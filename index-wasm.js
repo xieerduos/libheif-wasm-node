@@ -1,6 +1,7 @@
 const libheif = require("./libheif");
 const fs = require("fs");
 const jpeg = require("jpeg-js");
+const path = require("path");
 
 main();
 
@@ -28,6 +29,7 @@ async function main() {
     for (let c of img.channels) {
       if (c.id == libheif.heif_channel_interleaved) {
         resolve(c.data);
+        libheif.heif_image_release(img.image);
         return;
       }
     }
@@ -37,9 +39,15 @@ async function main() {
 
   console.timeEnd("使用WebAssembly耗时");
 
-  saveUint8ArrayAsJPEG(imageUint8Array, width, height, "wasm-result.jpg", 100);
+  saveUint8ArrayAsJPEG(
+    imageUint8Array,
+    width,
+    height,
+    path.join(__dirname, "wasm-result.jpg"),
+    100
+  );
 
-  saveUint8ArrayAsBMP(imageUint8Array, width, height, "result.bmp");
+  // saveUint8ArrayAsBMP(imageUint8Array, width, height, "result.bmp");
 }
 
 function saveUint8ArrayAsBMP(imageUint8Array, width, height, outputPath) {
